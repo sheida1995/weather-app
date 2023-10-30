@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>weather</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background-color: rgba(4, 1, 13, 0.733);
+      }
+      h1 {
+        color: dodgerblue;
+        margin-bottom: 20px;
+      }
+      form input {
+        width: 100%;
+        height: 40px;
+        padding: 10px;
+      }
+      .weather{
+        border: 1px solid #ccc;
+        margin-top: 15px;
+        padding: 15px;
+        width: 100%;
+        display: none;
+
+      }
+      .weather > *{
+        margin-bottom: 15px;
+      }
+      .loader {
+        margin-top: 50px;
+        left: 50%;
+  color: rgb(101, 101, 216);
+  font-size: 45px;
+  text-indent: -9999em;
+  overflow: hidden;
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  position: relative;
+  transform: translateZ(0);
+  display: none;
+  animation: mltShdSpin 1.7s infinite ease, round 1.7s infinite ease;
+}
+
+@keyframes mltShdSpin {
+  0% {
+    box-shadow: 0 -0.83em 0 -0.4em,
+    0 -0.83em 0 -0.42em, 0 -0.83em 0 -0.44em,
+    0 -0.83em 0 -0.46em, 0 -0.83em 0 -0.477em;
+  }
+  5%,
+  95% {
+    box-shadow: 0 -0.83em 0 -0.4em, 
+    0 -0.83em 0 -0.42em, 0 -0.83em 0 -0.44em, 
+    0 -0.83em 0 -0.46em, 0 -0.83em 0 -0.477em;
+  }
+  10%,
+  59% {
+    box-shadow: 0 -0.83em 0 -0.4em, 
+    -0.087em -0.825em 0 -0.42em, -0.173em -0.812em 0 -0.44em, 
+    -0.256em -0.789em 0 -0.46em, -0.297em -0.775em 0 -0.477em;
+  }
+  20% {
+    box-shadow: 0 -0.83em 0 -0.4em, -0.338em -0.758em 0 -0.42em,
+     -0.555em -0.617em 0 -0.44em, -0.671em -0.488em 0 -0.46em, 
+     -0.749em -0.34em 0 -0.477em;
+  }
+  38% {
+    box-shadow: 0 -0.83em 0 -0.4em, -0.377em -0.74em 0 -0.42em,
+     -0.645em -0.522em 0 -0.44em, -0.775em -0.297em 0 -0.46em, 
+     -0.82em -0.09em 0 -0.477em;
+  }
+  100% {
+    box-shadow: 0 -0.83em 0 -0.4em, 0 -0.83em 0 -0.42em, 
+    0 -0.83em 0 -0.44em, 0 -0.83em 0 -0.46em, 0 -0.83em 0 -0.477em;
+  }
+}
+
+@keyframes round {
+  0% { transform: rotate(0deg) }
+  100% { transform: rotate(360deg) }
+}
+ 
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>weather App</h1>
+      <form action="">
+        <input type="text" placeholder="enter city name" />
+      </form>
+      <span class="loader"></span>
+      <div class="weather"></div>
+    </div>
+
+    <script>
+      const form = document.querySelector("form");
+      const input = document.querySelector("input");
+      const weatherElement= document.querySelector(".weather");
+      const loaderElement = document.querySelector(".loader")
+      input.focus();
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const cityName = input.value.trim();
+        if (cityName !==""){
+            fetchWeatherInfo(cityName);
+        }
+      });
+
+      const fetchWeatherInfo = (city) => {
+        loaderElement.style.display = "block"
+        fetch(
+          `http://api.weatherapi.com/v1/current.json?key=ae64930d5f724c04bfd101653232810&q=${city}`
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            console.log(data);
+            if(!data.error){
+              weatherElement.innerHTML=`
+          <p>country : ${data.location.country}</p>
+          <p>city : ${data.location.name}</p>
+          <img src="${data.current.condition.icon}" alt="${data.current.condition.text}"/>
+          <p>${data.current.temp_c} C</p>
+          <p>${data.current.condition.text}</p>
+          <p>Local time : ${data.location.localtime}</p>
+          <p>${data.current.is_day ? "Day" : "Night"}</p>
+        `;
+        loaderElement.style.display = "none";
+        weatherElement.style.display ='block';
+        input.value = "";
+            } else{
+              weatherElement.innerHTML= `<h2 style='color:red'>${data.error.message}</h2>`;
+              setTimeout(()=>{
+                weatherElement.style.display="none"
+              }, 3000);
+            }
+            loaderElement.style.display = "none";
+            
+        }).catch((e) =>{
+          console.log(e);
+        })
+      };
+    </script>
+  </body>
+</html>
